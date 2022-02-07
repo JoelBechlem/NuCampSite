@@ -1,13 +1,15 @@
-import React, { Component} from 'react';
-import { Card, CardImg, CardText, CardBody, Breadcrumb, BreadcrumbItem,
-Button, Modal, ModalHeader, ModalBody, Label } from 'reactstrap';
+import React, { Component } from 'react';
+import {
+    Card, CardImg, CardText, CardBody, Breadcrumb, BreadcrumbItem,
+    Button, Modal, ModalHeader, ModalBody, Label
+} from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { Control, LocalForm, Errors } from 'react-redux-form';
 
 const maxLength = len => val => !(val) || (val.length <= len);
 const minLength = len => val => val && (val.length >= len);
 
-function RenderCampsite({campsite}) {
+function RenderCampsite({ campsite }) {
     return (
         <div className="col-md-5 m-1">
             <Card>
@@ -20,7 +22,7 @@ function RenderCampsite({campsite}) {
     );
 }
 
-function RenderComments({comments}) {
+function RenderComments({ comments, addComment, campsiteId }) {
     if (comments) {
         return (
             <div className="col-md-5 m-1">
@@ -31,13 +33,13 @@ function RenderComments({comments}) {
                             <div key={comment.id}>
                                 <p>
                                     {comment.text}<br />
-                                    -- {comment.author}, {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(comment.date)))}
+                                    -- {comment.author}, {new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: '2-digit' }).format(new Date(Date.parse(comment.date)))}
                                 </p>
                             </div>
                         );
                     })
                 }
-            <CommentForm/>
+                <CommentForm campsiteId={campsiteId} addComment={addComment} />
             </div>
         );
     }
@@ -62,15 +64,14 @@ class CommentForm extends Component {
 
     handleSubmit(values) {
         this.toggleModal();
-        console.log('Current state is: ' + JSON.stringify(values));
-        alert('Current state is: ' + JSON.stringify(values));
+        this.props.addComment(this.props.campsiteId, values.rating, values.author, values.text);
     }
 
     render() {
         return (
             <div>
 
-{/*Submit Comment Button*/}    
+                {/*Submit Comment Button*/}
                 <Button outline onClick={this.toggleModal}>
                     <i className="fa fa-pencil fa-lg" /> Submit Comment
                 </Button>
@@ -78,8 +79,8 @@ class CommentForm extends Component {
                     <ModalHeader toggle={this.toggleModal}>Submit Comment</ModalHeader>
                     <ModalBody>
                         <LocalForm onSubmit={values => this.handleSubmit(values)}>
-                    
-                    {/*Rating*/}    
+
+                            {/*Rating*/}
                             <div className="form-group">
                                 <Label htmlFor="rating">Rating</Label>
                                 <Control.select model=".rating" id="rating" name="rating"
@@ -92,16 +93,16 @@ class CommentForm extends Component {
                                 </Control.select>
                             </div>
 
-                    {/*Name*/}
+                            {/*Name*/}
                             <div className="form-group">
                                 <Label htmlFor="author">Your Name</Label>
                                 <Control.text model=".author" id="author" name="author"
                                     placeholder="Your Name"
                                     className="form-control"
-                                        validators={{
-                                            minLength: minLength(2),
-                                            maxLength: maxLength(15)
-                                        }}
+                                    validators={{
+                                        minLength: minLength(2),
+                                        maxLength: maxLength(15)
+                                    }}
                                 />
                                 <Errors
                                     className="text-danger"
@@ -115,16 +116,16 @@ class CommentForm extends Component {
                                 />
                             </div>
 
-                {/*Comment*/}
+                            {/*Comment*/}
                             <div className="form-group">
                                 <Label htmlFor="text">Comment</Label>
-                                    <Control.textarea model=".text" id="text" name="text"
-                                        rows="6"
-                                        className="form-control"
-                                    />
+                                <Control.textarea model=".text" id="text" name="text"
+                                    rows="6"
+                                    className="form-control"
+                                />
                             </div>
- 
-            {/*Submit Button*/}
+
+                            {/*Submit Button*/}
                             <Button type="submit" color="primary">
                                 Submit
                             </Button>
@@ -153,7 +154,11 @@ function CampsiteInfo(props) {
                 </div>
                 <div className="row">
                     <RenderCampsite campsite={props.campsite} />
-                    <RenderComments comments={props.comments} />
+                    <RenderComments
+                        comments={props.comments}
+                        addComment={props.addComment}
+                        campsiteId={props.campsite.id}
+                    />
                 </div>
             </div>
         );
